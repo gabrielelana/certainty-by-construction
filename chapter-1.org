@@ -1,0 +1,141 @@
+* A Gentle Introduction to Agda
+
+** Preface
+
+We can partially order all the programming languages with the notion of
+"strength".
+
+When you know the features of a programming language you can tell what is
+missing in a "weaker" programming language, you cannot do the opposite. AKA
+learning "strong" programming languages is beneficial of our overall
+understanding of the act of programming.
+
+What you do in a "weaker" programming language to overcome some missing feature
+(that maybe you don't know of) it can be considered an anti-pattern in a
+"stronger" language which does have that feature.
+
+Moving up in the lattice of the programming language we notice that things that
+we thought being part of programming turn out not to be particularly relevant to
+the actual task.
+
+NDG: In the introduction of [[https://www.youtube.com/watch?v=-J_xL4IGhJA]["Structure and Intepretation of Computer Programs"]]
+Abelson says that programming is not about computers but more realted to the
+power of precisely describe "how to do things" and therefore closer to a form of
+magic (referring to the "Charm of Making" from [[https://en.wikipedia.org/wiki/Excalibur_(film)]["Excalibur" movie (1981)]]) and
+that is why the book is called [[http://www.catb.org/~esr/jargon/html/W/Wizard-Book.html]["The Wizard Book"]] (and it's also the reason why
+there's a wizard on the cover of the book).
+
+Agda abstracts away the notion of execution entirely. It's type system is
+powerful enough to be able to encode our theorems in the signature of a function
+and to be able to consider a valid implementation as the proof of the theorem.
+
+Will a non-executable programming language be useful?
+
+#+BEGIN_QUOTE
+Programming is a creative endeavor, and every program leaves its mark on its
+creator. It is through these mental battle scars, accumulated from struggling
+with and conquering problems, that we become better programmers.
+#+END_QUOTE
+
+The purpose of solving a problem in Agda is not to be able to run the resulting
+code but the process will teach us so much more about the problem than what we
+thought there was to know.
+
+#+BEGIN_QUOTE
+Without total conceptual clarity, our software can never possibly be correct, if
+for no other reason than we don’t know what correct means.
+#+END_QUOTE
+
+** A Gentle Introduction to Agda
+
+[[file:src/Chapter1-Agda.agda::module Chapter1-Agda where][How to define a module]]
+
+Example of [[file:src/Chapter1-Agda.agda::module Example-Imports where][module import]]
+
+Syntax highlighting is done by the compiler, therefore is more "semantic
+highlighting"
+
+"Crafting Data" is designing the shapes that constrain the values we are
+interested in discussing. Data is constrained by /types/ which are rigorous
+means of constructing and deconstructing data.
+
+Agda is a /Dependently-Typed/ programming language, meaning that types can be
+computed.
+
+Agda has the notion of /Typing Judgment/ which is the static assertion that a
+particular value has a particular type. Can be considered a type declaration.
+The ~true : Bool~ is a judgment stating that the value ~true~ is of type ~Bool~.
+
+Adga can assert the existence of things without having to give them a definition
+by using the ~postulate~ keyword. [[file:src/Chapter1-Agda.agda::module Example-Judgments where][Here an example]] where we are postulating the
+existence of a type with name ~Bool~ and with values ~true~ and ~false~.
+
+Anything that belongs to a type is a value. A type can have many values. A value
+has only one type.
+
+Working directly with postulate is dangerous and an anti-pattern, as an
+alternative we can [[file:src/Chapter1-Agda.agda::module Booleans where][define booleans]] in a /Closed Theory/ so that ~true~ and
+~false~ will be the only two possible boolean values.
+
+We can say that ~true~ and ~false~ are the /Data Constructors/ or the
+/Introductory Forms/ of ~Bool~.
+
+Define our first function ~not~ [[file:src/Chapter1-Agda.agda::not : Bool → Bool][here]].
+
+Agda is an interactive tool, writing a program in Agda is like a conversation
+with a compiler.
+
+A program can be incomplete, can contain "missing parts", the missing parts are
+called /Holes/, /Holes/ can be refined by adding more and more details and or
+introducing smaller /Holes/.
+
+~C-c C-c~ will ask Agda to "make case"
+
+~C-c C-,~ will ask Agda the "type context"
+
+We can ask Agda to /Normalize/ every expression with ~C-c C-n~. Example ~not
+(not false)~ can be rewritten (using ~not false = true~) as ~not true~ but which
+we can rewrite (using ~not true = false~) as ~false~. Every "rewrite" comes from
+a function definition.
+
+After importing ~Relation.Binary.PropositionalEquality~ we can "assert" with ~≡~
+that the expressions on both sides "normalize" to the same form. (NDG: note here
+that he uses the term "form" and not "value", I guess that's because we are at
+type level here and not at value level). With [[file:src/Chapter1-Agda.agda::_ : not (not false) ≡ false][this]] we can "test" that ~not (not
+false)~ normalizes to ~false~.
+
+Failing one of this tests will prevent the compilation of the whole module.
+
+Agda is an expression language, every unit of code must produce a value.
+
+In Agda every variable is immutable. This will maintain the context of reasoning
+as small as possible.
+
+In the ~not~ function [[file:src/Chapter1-Agda.agda::not : Bool → Bool][definition]] when we say that ~not false = true~ you can
+read it as a definition that ~not false~ is ~true~ and the equality works in
+both directions! Although Agda will replace the left side with the right side
+for normalization, in other cases we could also replace the right side with the
+left side with perfect utility.
+
+** Summary
+- Define a module
+- Include a module
+- Open a module
+- Semantic highlighting
+- Crafting data
+- Dependently-typed language
+- Typing judgment
+- Postulate
+- What is ~Set~
+- What is a type
+- What is a value
+- Closed theory
+- Data constructors
+- Make case
+- Type context
+- Expression normalization
+- "Unit" test (more like type level tests)
+- Unicode
+- Expression language
+- Syntax
+- Operators
