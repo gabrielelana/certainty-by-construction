@@ -117,6 +117,81 @@ both directions! Although Agda will replace the left side with the right side
 for normalization, in other cases we could also replace the right side with the
 left side with perfect utility.
 
+(NGD: second meeting from starts from here)
+
+#+BEGIN_SRC agda
+_v₁_ : Bool → Bool → Bool
+true v₁ true = true
+true v₁ false = true
+false v₁ true = true
+false v₁ false = false
+
+-- v₂ is better:
+-- v₂ has less branches
+-- v₂ needs to inspect less data to come to a solution
+-- v₂ in some case can answer without waiting for the second argument
+
+_v₂_ : Bool → Bool → Bool
+false v₂ other = other
+true v₂ other = true
+
+-- When normalize `true v₂_` we will get `λ other → true` aka a function which will
+-- ignore the next argument and will return `true`
+
+-- When normalize `true v₁_` we will get `true v₁_` aka the same function, no further
+-- normalization can be applied
+#+END_SRC
+
+Partial application of function is possible using ~_~ so ~_v₁ true~ will
+partially apply ~v₁~ on the right and ~true v₁_~ will partially apply on the
+left. Sometimes called "taking a section" of a function.
+
+When and expression cannot be further normalized/reduce is called "stuck".
+
+A postulate value will always be "stuck" to itself. Agda will never inspect a
+postulated value to make progress (NDG: kind of like an opaque type?).
+
+#+BEGIN_SRC agda
+postulate always-stuck: Bool
+
+-- C-c C-n: always-stuck
+-- result: always-stuck
+
+-- C-c C-n: not always-stuck
+-- result: not always-stuck
+#+END_SRC
+
+Example of a [[file:src/Chapter1-Agda.agda::record Employee : Set where][record]]
+
+Example of a use of record to define a "generic" [[file:src/Chapter1-Agda.agda::record _×_ (A: Set) (B: Set) : Set where][tuple]] (NDG: explain the meaning
+here of "generic")
+
+How to project a field out of a record?
+- [[file:src/Chapter1-Agda.agda::first record { proj₁ = p1 ; proj₂ = p2 } = p1][Pattern matching]]
+- [[file:src/Chapter1-Agda.agda::a-tuple-first : Bool][Record access syntax]]
+- [[file:src/Chapter1-Agda.agda::a-tuple-second = _×_.proj₂ a-tuple][Record selector syntax]]
+
+The ~→~ is a type operator with very low priority and with left associativity,
+so a function with two parameters of type ~A~ and ~B~ and with a result of type
+~C~ has type ~A → B → C~ which by right associativity is ~A → (B → C)~, so it's
+a function which given the first parameter of type ~A~ gives you back a function
+which will take a parameter of type ~B~ and gives you back a value of type ~C~.
+
+What are the curly braces in the type singatures?
+
+#+BEGIN_SRC agda
+-- Type of tuple constructor
+_,_ : {A B : Set} → A → B → A × B
+
+-- Syntax sugar for
+_,_ : {A : Set} → {B : Set} → A → B → A × B
+
+-- `A` and `B` look like argument to the function `_,_`
+
+-- They are, the curly braces makes them invisible or implicit
+#+END_SRC
+
+
 ** Summary
 - Define a module
 - Include a module
@@ -139,3 +214,12 @@ left side with perfect utility.
 - Expression language
 - Syntax
 - Operators
+
+- Nothing of "taking a section" aka partial application
+- Nothing of being "stuck"
+- Product types
+- Fixities (associativity and precedence of operators)
+- Functions type and currying
+- Implicit type parameters
+- Make type parameters explicit
+- Elaboration
