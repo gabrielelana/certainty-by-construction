@@ -1,0 +1,146 @@
+* An Exploration of Numbers
+
+** Preface
+
+- Will implement different number systems in Agda.
+- Goals:
+  - Get some experience on how to model problems in Agda.
+  - Practice seeing familiar objects (numbers) with fresh eyes.
+  - Get familiar with mathematical objects that we will need next.
+
+NOTE: Agda already has support for numbers, not as primitives but as library
+code, we will use numbers as a playground since they are well understood domain.
+
+NOTE: After this chapter we are going to use numbers in the standard library
+because more complete and more suitable for real work.
+
+** Reminder
+
+Blub paradox: ranking programming languages by power, if you know think in one
+of the middle languages (the "blub") you can spot the less powerful, but not the
+more powerful one.
+
+Co-Blub paradox: knowledge of a less powerful language is /actively harmful/ in
+the context of a more powerful language.
+
+** Natural Numbers
+
+We are going to represent numbers not to please computers (see Co-Blub paradox)
+but to please human reasoning.
+
+#+BEGIN_QUOTE
+We cannot reach paradise if we are not able to immagine it.
+#+END_QUOTE
+
+Start with a /unary/ [[file:src/Chapter2-Numbers.agda::data ℕ : Set where][representation]] of natural numbers, this inefficient
+representation will drammatically simplify math (NDG: check the last statement
+at the end of the chapter).
+
+Use ~record~ types to aggregate things that already exists. Use ~data~ types to
+define new things.
+
+** Induction
+
+Booleans have only two values, Numbers have a potentially infinite number of
+values we need to care for, we cannot care for them individually/extensively.
+
+A strategy will be to care only about a finite number of /interesting cases/:
+- the base case (or more cases) = proving something for certain known values
+- the inductive case = proving that if something is true for a case then it hold
+  also fof the next case.
+
+See [[file:src/Chapter2-Numbers.agda::even? : ℕ → Bool][~even?~]] implementation as an example.
+
+NDG: with ~even?~ it mentions "boolean blindness", in common term here doesn't
+look like the case because a boolean is a perfect answer to the question "is
+this number even?", what it really means is that using ~even?~ to characterize
+the "evenness" of a number is a poor replacement of a type directly able to do
+that, see what follows.
+
+** Two Notions of Evenness
+
+What if we will want to have a *type* to represent even natural numbers?
+
+[[file:src/Chapter2-Numbers.agda::IsEven : ℕ → Set][This]] example show us that Agda can have functions returning types like it's
+nothing 😃
+
+A more proper way will be to use a an /indexed data type/
+
+#+BEGIN_SRC agda
+data IsEven : ℕ → Set where
+  zero-even : IsEven zero
+  suc-suc-even : {n : ℕ} → IsEven n → IsEven (suc (suc n))
+#+END_SRC
+
+Because of the parameter ~ℕ~ we say that ~IsEven~ is an /indexed type/ and that
+~ℕ~ is the /index/.
+
+Consructors of an /indexed type/ are "assertions" about the index. You will have
+a constructor only if the index has the property you want to represent with the
+type.
+
+#+BEGIN_QUOTE
+The idea is to carefully construct types whose values are possible only when our
+desired property is actually true.
+#+END_QUOTE
+
+** Constructing Evidence
+
+With the function ~even?~ which returns a boolean we have to:
+- compute the boolean value
+- use the boolean value to conditionally run some code
+- throw away the boolean value
+
+If we later need to known again if the same number is even, we need to do it all
+over again.
+
+Instead of returning a ~Bool~ we can have ~even?~ return an ~IsEven~ type which
+will carry the proof of its evenness forever.
+
+But, not all numbers are even therefore we need a [[file:src/Chapter2-Numbers.agda::data Maybe (A : Set) : Set where][representation of failure]].
+
+Then we can try to come up with the function that we really want
+~evenEv : (n : ℕ) → Maybe (IsEven n)~.
+
+** Addition
+
+To do addition we will keep using [[file:src/Chapter2-Numbers.agda::_+_ : ℕ → ℕ → ℕ][induction]] first handling the base (explicit)
+case and then the inductive step.
+
+NOTE: you can pick any parameter to do induction on (aka to destructor in its
+more primitive components) but it's better to choose the first, for clarity and
+performance reasons.
+
+NOTE: doing induction means calling ~agda2-make-case~ (~C-c C-c~) on your
+choosen parameter.
+
+** Termination Checking
+
+NOTE: when the left side of an equation is identitical to the right side then
+you will not be able to make progress in any proof, you will end up in an
+infinite loop. Agda is smart enough to tell you though
+
+#+BEGIN_SRC agda
+_+_ : ℕ → ℕ → ℕ
+zero + y = y
+suc x + y = suc x + y
+
+-- Error:
+-- Termination checking failed for the following functions:
+--   Sandbox-Naturals._+_
+-- Problematic calls:
+--   suc x + y
+#+END_SRC
+
+** Multiplication and Exponentiation
+
+Implement [[file:src/Chapter2-Numbers.agda::_*_ : ℕ → ℕ → ℕ][multiplication]]
+
+Implement [[file:src/Chapter2-Numbers.agda::_^_ : ℕ → ℕ → ℕ][exponentiation]]
+
+** Semi-subtration
+
+Naturals do not support substration because you can go below zero, but we could
+think in such cases to stop at zero. This operation is called "monus"
+
+Implement monus
