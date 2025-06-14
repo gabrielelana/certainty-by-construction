@@ -103,12 +103,6 @@ module Chapter2-Numbers where
 
   -- 2.6 Constructing Evidence
 
-  -- TODO: what is the difference between
-  --   `data X : A → Set where ...`
-  -- and
-  --   `data X (A : Set) : Set where ...`
-  -- ???
-
   data Maybe (A : Set) : Set where
     just : A → Maybe A
     nothing : Maybe A

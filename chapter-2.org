@@ -102,6 +102,41 @@ But, not all numbers are even therefore we need a [[file:src/Chapter2-Numbers.ag
 Then we can try to come up with the function that we really want
 ~evenEv : (n : ℕ) → Maybe (IsEven n)~.
 
+NOTE: the following section is to explain the difference between the form of
+data type ~data X : A → Set where ...~ and ~data X (A : Set) : Set where ...~
+
+*** Parametrized Data Types
+
+Datatypes can have parameters. They are declared after the name of the datatype
+but before the colon ([[https://agda.readthedocs.io/en/latest/language/data-types.html#parametrized-datatypes][see the full explanation]])
+
+#+BEGIN_SRC agda
+data List (A : Set) : Set where
+  []  : List A
+  _∷_ : A → List A → List A
+#+END_SRC
+
+*** Indexed Data Types
+
+In contrast to parameters which are required to be the same for all
+constructors, indices can vary from constructor to constructor. They are
+declared after the colon as function arguments to ~Set~.
+
+For example, fixed length vectors can be defined by indexing them over their
+length of type ~Nat~.
+
+NOTE: the *parameter* ~A~ is bound once for all constructor (universally
+quantified?)
+
+NOTE: the *index* ~{n : Nat}~ is bound locally in every constructor
+(existentially quantified?)
+
+#+BEGIN_SRC agda
+data Vector (A : Set) : Nat → Set where
+  []  : Vector A zero
+  _∷_ : {n : Nat} → A → Vector A n → Vector A (suc n)
+#+END_SRC
+
 ** Addition
 
 To do addition we will keep using [[file:src/Chapter2-Numbers.agda::_+_ : ℕ → ℕ → ℕ][induction]] first handling the base (explicit)
