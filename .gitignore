@@ -1,3 +1,4 @@
 */*
 !*.agda
 !*.org
+.project.org
