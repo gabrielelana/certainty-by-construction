@@ -16,9 +16,9 @@ because more complete and more suitable for real work.
 
 ** Reminder
 
-Blub paradox: ranking programming languages by power, if you know think in one
-of the middle languages (the "blub") you can spot the less powerful, but not the
-more powerful one.
+Blub paradox: ranking programming languages by power, if you know and think in
+one of the middle languages (the "blub") you can spot the less powerful, but not
+the more powerful one.
 
 Co-Blub paradox: knowledge of a less powerful language is /actively harmful/ in
 the context of a more powerful language.
@@ -33,21 +33,22 @@ We cannot reach paradise if we are not able to immagine it.
 #+END_QUOTE
 
 Start with a /unary/ [[file:src/Chapter2-Numbers.agda::data ℕ : Set where][representation]] of natural numbers, this inefficient
-representation will drammatically simplify math (NDG: check the last statement
-at the end of the chapter).
+representation will drammatically simplify math.
 
-Use ~record~ types to aggregate things that already exists. Use ~data~ types to
-define new things.
+Use ~data~ types to define new things.
+
+Use ~record~ types to aggregate things that already exists.
 
 ** Induction
 
-Booleans have only two values, Numbers have a potentially infinite number of
-values we need to care for, we cannot care for them individually/extensively.
+Booleans (~𝔹~) have only two values, Numbers (~ℕ~) have a potentially infinite
+number of values we need to care for, we cannot care for them
+individually/extensively.
 
 A strategy will be to care only about a finite number of /interesting cases/:
-- the base case (or more cases) = proving something for certain known values
+- the base case (or cases) = proving something for certain known values
 - the inductive case = proving that if something is true for a case then it hold
-  also fof the next case.
+  also for the next case.
 
 See [[file:src/Chapter2-Numbers.agda::even? : ℕ → Bool][~even?~]] implementation as an example.
 
@@ -75,9 +76,9 @@ data IsEven : ℕ → Set where
 Because of the parameter ~ℕ~ we say that ~IsEven~ is an /indexed type/ and that
 ~ℕ~ is the /index/.
 
-Consructors of an /indexed type/ are "assertions" about the index. You will have
-a constructor only if the index has the property you want to represent with the
-type.
+Constructors of an /indexed type/ are "assertions" about the index. You will
+have a constructor only if the index has the property you want to represent with
+the type.
 
 #+BEGIN_QUOTE
 The idea is to carefully construct types whose values are possible only when our
@@ -102,13 +103,13 @@ But, not all numbers are even therefore we need a [[file:src/Chapter2-Numbers.ag
 Then we can try to come up with the function that we really want
 ~evenEv : (n : ℕ) → Maybe (IsEven n)~.
 
-NOTE: the following section is to explain the difference between the form of
-data type ~data X : A → Set where ...~ and ~data X (A : Set) : Set where ...~
+NOTE: the following section is here to explain the difference between the form
+of data type ~data X : A → Set where ...~ and ~data X (A : Set) : Set where ...~
 
 *** Parametrized Data Types
 
 Datatypes can have parameters. They are declared after the name of the datatype
-but before the colon ([[https://agda.readthedocs.io/en/latest/language/data-types.html#parametrized-datatypes][see the full explanation]])
+but before the colon ([[https://agda.readthedocs.io/en/latest/language/data-types.html#parametrized-datatypes][read the full explanation]])
 
 #+BEGIN_SRC agda
 data List (A : Set) : Set where
@@ -132,22 +133,24 @@ NOTE: the *index* ~{n : Nat}~ is bound locally in every constructor
 (existentially quantified?)
 
 #+BEGIN_SRC agda
-data Vector (A : Set) : Nat → Set where
+data Vector (A : Set) : ℕ → Set where
   []  : Vector A zero
-  _∷_ : {n : Nat} → A → Vector A n → Vector A (suc n)
+  _∷_ : {n : ℕ} → A → Vector A n → Vector A (suc n)
 #+END_SRC
+
+([[https://agda.readthedocs.io/en/latest/language/data-types.html#indexed-datatypes][Read the full explanation]])
 
 ** Addition
 
-To do addition we will keep using [[file:src/Chapter2-Numbers.agda::_+_ : ℕ → ℕ → ℕ][induction]] first handling the base (explicit)
-case and then the inductive step.
+To do addition we will keep using [[file:src/Chapter2-Numbers.agda::_+_ : ℕ → ℕ → ℕ][induction]] by first handling the base
+(explicit) case and then the inductive case.
 
-NOTE: you can pick any parameter to do induction on (aka to destructor in its
-more primitive components) but it's better to choose the first, for clarity and
-performance reasons.
+NOTE: you can pick any parameter to do induction on (aka you can decompose in
+its more primitive components any of the parameters by pattern matching) but
+it's better to choose the first, for clarity and better performance.
 
-NOTE: doing induction means calling ~agda2-make-case~ (~C-c C-c~) on your
-choosen parameter.
+NOTE: induction in Agda can be done by calling ~agda2-make-case~ (~C-c C-c~) on
+your choosen parameter.
 
 ** Termination Checking
 
@@ -178,4 +181,4 @@ Implement [[file:src/Chapter2-Numbers.agda::_^_ : ℕ → ℕ → ℕ][exponenti
 Naturals do not support substration because you can go below zero, but we could
 think in such cases to stop at zero. This operation is called "monus"
 
-Implement monus
+Implement [[file:src/Chapter2-Numbers.agda::_∸_ : ℕ → ℕ → ℕ][monus]]
