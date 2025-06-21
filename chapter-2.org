@@ -182,3 +182,112 @@ Naturals do not support substration because you can go below zero, but we could
 think in such cases to stop at zero. This operation is called "monus"
 
 Implement [[file:src/Chapter2-Numbers.agda::_∸_ : ℕ → ℕ → ℕ][monus]]
+
+** Inconvenient Integers
+
+Let's try to model integers (~ℤ~) the wrong way first
+
+#+BEGIN_SRC agda
+data ℤ : Set where
+  zero : ℤ
+  suc : ℤ → ℤ
+  pred : ℤ → ℤ
+#+END_SRC
+
+It's wrong because we will have multiple representation of the same number
+because arbritrary occurrences of ~pred~ and ~suc~ can be canceled out, aka
+~(... pred (... (suc (... x)))~ is equal to ~(... (... (... x)))~ and it will
+not be easy to implement a function to cancel out the ~pred/suc~ or ~suc/pred~
+sequences.
+
+Another wrong way would be to represent them as a tuple
+
+#+BEGIN_SRC agda
+open ℕ using (ℕ; zero; suc)
+
+-- We will represent integers using a positive component and a negative component,
+-- basically the number is going to be `pos - neg`
+
+record ℤ : Set where
+  constructor mkℤ
+  field
+    pos : ℕ
+    neg : ℕ
+
+-- Still have multiple representation of the same number but this time
+-- we can implement a normalize function
+
+normalize : ℤ → ℤ
+normalize (mkℤ zero neg) = mkℤ zero neg
+normalize (mkℤ (suc pos) zero) = mkℤ (suc pos) zero
+normalize (mkℤ (suc pos) (suc neg)) = normalize (mkℤ pos neg)
+
+-- We are going to implement the sum of two numbers: `(p1, n1)` and `(p2, n2)`
+-- Since the numbers are `p1 - n1` and `p2 - n2` we can say the the sum is
+-- `(p1 - n1) + (p2 - n2)` therefore we can distribute over the substraction
+-- and end up with a convenient `(p1 + p2) - (n1 + n2)` which is, according
+-- with our representation `(p1 + p2, n1 + n2)`
+
+_+_ : ℤ → ℤ → ℤ
+mkℤ p₁ n₁ + mkℤ p₂ n₂
+  = normalize (mkℤ (p₁ ℕ.+ p₂) (n₁ ℕ.+ n₂))
+
+-- Same for subtraction and multiplication
+
+_-_ : ℤ → ℤ → ℤ
+mkℤ p₁ n₁ - mkℤ p₂ n₂
+  = normalize (mkℤ (p₁ ℕ.+ n₂) (n₁ ℕ.+ p₂))
+
+_*_ : ℤ → ℤ → ℤ
+mkℤ p₁ n₁ * mkℤ p₂ n₂
+  = normalize
+    (mkℤ (p₁ ℕ.* p₂ ℕ.+ n₁ ℕ.* n₂)
+         (p₁ ℕ.* n₂ ℕ.+ p₂ ℕ.* n₁))
+#+END_SRC
+
+The constant call to ~normalize~ is a bad smell, and it's going to complicate
+every use of this representation, having multiple representation of the same
+value is a problem for equality, and equality is an important foundation. Can we
+do better?
+
+We can partition in a mutually exclusive way the positive and negative nature of
+the number
+
+#+BEGIN_SRC agda
+data ℤ : Set where
+  +_ : ℕ → ℤ
+  -_ : ℕ → ℤ
+
+-- This will give us a unique representation of numbers except for the zero,
+-- for which we have two representations
+
+_ : ℤ
+_ : + 0
+
+_ : ℤ
+_ : - 0
+#+END_SRC
+
+** Unique Integer Representation
+
+At the end we end up with the [[file:src/Chapter2-Numbers.agda::data ℤ : Set where][correct representation]].
+
+** Pattern Synonyms
+
+We can define new synonyms for constructors that can be used as patterns in
+deconstructing values, so that our functions can be [[file:src/Chapter2-Numbers.agda::-_ : ℤ → ℤ][written nicely]].
+
+[[https://agda.readthedocs.io/en/latest/language/pattern-synonyms.html][Read here]] for more on Pattern Synoyms.
+
+#+BEGIN_QUOTE
+As a rule of thumb, you should define a pattern synonym whenever you notice
+yourself frequently using the same series of constructors together. Pattern
+synonyms are valuable in providing a different lens into how you put your data
+together.
+#+END_QUOTE
+
+** Integer addition
+
+[[file:src/Chapter2-Numbers.agda::_+_ : ℤ → ℤ → ℤ][Addition]] after implementing general [[file:src/Chapter2-Numbers.agda::_⊖_ : ℕ → ℕ → ℤ][subtraction]] between natural numbers.
+
+We can end up implementing [[file:src/Chapter2-Numbers.agda::_*_ : ℤ → ℤ → ℤ][multiplication]].

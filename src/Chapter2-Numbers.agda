@@ -1,6 +1,10 @@
 module Chapter2-Numbers where
-  import Chapter1-Agda
 
+open import Relation.Binary.PropositionalEquality
+
+import Chapter1-Agda
+
+module Sandbox-Naturals where
   data ℕ : Set where
     zero : ℕ                    -- 0 / base case
     suc : ℕ → ℕ                 -- x → x + 1 / inductive step
@@ -19,6 +23,12 @@ module Chapter2-Numbers where
 
   four : ℕ
   four = suc three
+
+  five : ℕ
+  five = suc four
+
+  six : ℕ
+  six = suc five
 
   open Chapter1-Agda using (Bool; true; false)
 
@@ -184,3 +194,112 @@ module Chapter2-Numbers where
 
   _ : one ∸ three ≡ zero
   _ = refl
+
+module Sandbox-Integers where
+  import Data.Nat as ℕ
+  open ℕ using (ℕ)
+
+  data ℤ : Set where
+    +_ : ℕ → ℤ
+    -[1+_] : ℕ → ℤ
+
+  zero : ℤ
+  zero = + ℕ.zero
+
+  one : ℤ
+  one = + 1
+
+  -one : ℤ
+  -one = -[1+ ℕ.zero ]
+
+  suc : ℤ → ℤ
+  suc (+ x) = + ℕ.suc x
+  suc -[1+ ℕ.zero ] = zero
+  suc -[1+ (ℕ.suc x) ] = -[1+ x ]
+
+  pred : ℤ → ℤ
+  pred (+ ℕ.suc x) = + x
+  pred (+ ℕ.zero) = -one
+  pred -[1+ x ] = -[1+ ℕ.suc x ]
+
+  -- Not symmetric implementation of ~-~ 🤮
+  -- -_ : ℤ → ℤ
+  -- - (+ ℕ.zero) = + ℕ.zero
+  -- - (+ ℕ.suc x) = -[1+ x ]
+  -- - -[1+ x ] = + ℕ.suc x
+
+  -- To make ℤ symmetric
+  pattern +[1+_] n = + ℕ.suc n
+
+  -- To make ℤ look prettier
+  pattern +0 = + ℕ.zero
+
+  -- After the definition of this "Pattern Synonyms"
+  -_ : ℤ → ℤ
+  - +0 = +0
+  - +[1+ x ] = -[1+ x ]
+  - -[1+ x ] = +[1+ x ]
+
+  module Naive-Addition where
+
+    -- Now we can subtract a natural from another natural and get back an integer
+    _⊖_ : ℕ → ℕ → ℤ
+    ℕ.zero ⊖ ℕ.zero = +0
+    ℕ.zero ⊖ ℕ.suc y = -[1+ y ]
+    ℕ.suc x ⊖ ℕ.zero = +[1+ x ]
+    ℕ.suc x ⊖ ℕ.suc y = x ⊖ y
+
+    infixl 5 _+_
+
+    _+_ : ℤ → ℤ → ℤ
+    + x + + y = + (x ℕ.+ y)
+    + x + -[1+ y ] = x ⊖ ℕ.suc y
+    -[1+ x ] + + y = y ⊖ ℕ.suc x
+    -[1+ x ] + -[1+ y ] = -[1+ x ℕ.+ ℕ.suc y ]
+
+    _ : -[1+ 4 ] + +[1+ 4 ] ≡ +0
+    _ = refl
+
+    _ : -[1+ 4 ] + +[1+ 3 ] ≡ -one
+    _ = refl
+
+    _ : -[1+ 3 ] + +[1+ 4 ] ≡ one
+    _ = refl
+
+    -- We can implement general subtraction between integers
+    _-_ : ℤ → ℤ → ℤ
+    x - y = x + (- y)
+
+    -- And multiplication
+    _*_ : ℤ → ℤ → ℤ
+    +0 * y = +0
+    x * +0 = +0
+    x * +[1+ ℕ.zero ] = x
+    x * -[1+ ℕ.zero ] = - x
+    x * +[1+ ℕ.suc y ] = (+[1+ y ] * x) + x
+    x * -[1+ ℕ.suc y ] = (-[1+ y ] * x) - x
+
+    _ : (+ 2) * (+ 3) ≡ +[1+ 5 ]
+    _ = refl
+
+    _ : (- (+ 2)) * (+ 3) ≡ -[1+ 5 ]
+    _ = refl
+
+    _ : (- (+ 2)) * (- (+ 3)) ≡ +[1+ 5 ]
+    _ = refl
+
+open import Data.Nat
+  using (ℕ; zero; suc; _+_; _*_; _^_; _∸_)
+  public
+
+open Sandbox-Naturals
+  using (one; two; three; four; five; six)
+
+open Sandbox-Naturals
+  using (IsEven)
+  renaming ( zero-even to z-even ; suc-suc-even to ss-even )
+  public
+
+open import Data.Maybe
+  using (Maybe; just; nothing)
+  public
