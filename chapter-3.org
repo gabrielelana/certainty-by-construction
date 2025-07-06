@@ -1,0 +1,138 @@
+* Proof Objects
+
+** Preface
+In Agda doing proofs is a clear process, either it types check or it doesn't and
+the feedback loop is really fast.
+
+** Constructivism
+
+In *classical logic* all mathematical statements are either true or false (see
+[[https://en.wikipedia.org/wiki/Law_of_excluded_middle][law of excluded middle]]) therefore we can prove that somethig is true by showing
+that its negation leads to a contraddiction (see [[https://en.wikipedia.org/wiki/Reductio_ad_absurdum][reductio ad absurdum]])
+
+In *intuitionistic logic* requires explicit, step-by-step proofs that builds up
+the truth of a proposition, in a sense is "prove by doing".
+
+Under a computational settings using intuitionistic logic is compelling because
+constructive arguments correspond to objects we can hold in our hands (memory).
+
+#+BEGIN_QUOTE
+Intuitionistic proofs correspond to algorithms.
+#+END_QUOTE
+
+** Statements are Types; Programs are Proofs
+
+See [[https://www.youtube.com/watch?v=SknxggwRPzU]["Propostition as Types"]]
+
+#+BEGIN_QUOTE
+Anything you cn define precisely and manipulate symbolically can fall under the
+purview of mathematics when done right.
+#+END_QUOTE
+
+In math *statements* are claims you can make, *theorems* are claims you can
+prove.
+
+(NDG: for Sandy "proposition" is too overloaded to be used, therefore he will
+use the term "statement")
+
+Therefore theorems are made of two parts: a statement and a proof.
+
+|---------------+------------------------+--------------------------|
+| *Mathematics* | *Programming*          | *What*                   |
+|---------------+------------------------+--------------------------|
+| Statement     | Type of a program      | Description of a problem |
+|---------------+------------------------+--------------------------|
+| Proof         | Program with that type | Solution of the problem  |
+|---------------+------------------------+--------------------------|
+
+This correspondence between math and programming is called "Curry-Howard correspondence".
+
+#+BEGIN_SRC Agda
+-- Simplest example
+
+-- Statement: a boolean exists
+-- Type: Bool
+
+-- Proof: provide a boolean value
+-- Program: true
+
+_ : Bool
+_ = true
+
+-- In particular we have two proofs of the existance of booleans: `true` and `false` 🤪
+#+END_SRC
+
+We say that a type is /inhabited/ if there exists at least one value of tha
+type. Therefore every inhabitant of a type is a valid proof of that statement.
+
+#+BEGIN_QUOTE
+To proove things in Agda we write down the problem, encoding the statement as a
+type and then we work hard to construct a value of that type.
+#+END_QUOTE
+
+** Hard to Prove or Simply False?
+
+When you are not making progress in building an instance of some type, is it
+because you are taking the wrong approach or because it's literally impossible?
+
+Note that it's the outmost importance the "principle of consistency": there
+should be no proof of false statements. Otherwise eveything can be proven (see
+[[https://en.wikipedia.org/wiki/Principle_of_explosion]["ex falso sequitur quodlibet"]]).
+
+#+BEGIN_SRC Agda
+-- The inductive type with no constructors.
+-- With no constructors there's no way to build an instance of this statement,
+-- as it should be
+
+-- Same as `never` in TypeScript
+-- Same as `Nothing` in Scala
+-- Same as `undefined` in Haskell
+
+data ⊥ : Set where
+
+exfalso : ⊥ \to A
+exfalso ()
+
+-- In other terms, if you are able to provide me an inhabitant of ⊥ (which we know
+-- it's impossible) then I can give you whatever you want.
+#+END_SRC
+
+To avoid chasing wrong leads check first that the statement you are trying to
+prove works in the simplest cases (NDG: did I hear "example based tests" 😁)
+
+** The Equality Type
+
+Equality in our case is when "two expressions will eventually evaluate to the
+exasct same tree of constructors", which is also known as "propositional
+equality".
+
+[[file:src/Chapter3-Proofs.agda::data _≡_ {A : Set} : A → A → Set where][Implementation]]
+
+We can use propositional equality not only to make unit tests but also to
+automatically show some [[file:src/Chapter3-Proofs.agda::zero-is-+-identity₁ : ∀ (n : ℕ) → zero + n ≡ n][algebraic identities]].
+
+In proving the identity of zero we got stuck by proving that ~suc (n + zero) ≡
+suc n~. We already proved that the statement is true when ~n~ reaches ~zero~, so
+thinking like a computer programmer maybe we can use recursion since we have
+covered the base case. Problem is that we will get back the wrong proof because
+we need the proof for ~suc n~ but from the recursive call we can get back the
+proof for ~n~, we need a way to turn a proof for ~n~ in a proof for ~suc n~.
+
+We can do that using "congruence": if ~x~ and ~y~ are equal than so are ~f x~
+and ~f y~ for any function ~f~.
+
+#+BEGIN_SRC Agda
+cong : {A B : Set} \to {x y : A} \to (f : A \to B) \to x ≡ y \to f x ≡ f y
+cong = ?
+#+END_SRC
+
+In our case the ~x~ is the proof for ~n~ (remember that a proof is a ~Set~) and
+the ~f~ is ~suc~, so ~cong suc~ will be able to turn a proof for ~n~ is a proof
+for ~suc n~.
+
+** Identity and Zero Elements
+
+We already proven the identity for addition.
+
+We proceed to prove the existence of zero and identity elements for different
+operations.
