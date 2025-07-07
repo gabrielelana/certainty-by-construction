@@ -136,3 +136,33 @@ We already proven the identity for addition.
 
 We proceed to prove the existence of zero and identity elements for different
 operations.
+
+** Symmetry and Involutivity
+
+We proved that ~1 * a = a~ how hard would be to prove that ~a = 1 * a~? A
+reasonable thing to do would be to reuse a very similar proof
+
+#+BEGIN_SRC Agda
+*-identityˡ′ : ∀ (x : ℕ) → x ≡ one * x
+*-identityˡ′ = *-identityˡ
+#+END_SRC
+
+But it doesn't work, because they have different types.
+
+The propositional equality type ~≡~ is nothing special, we defined ourselves, is
+not something embedded in the language, therefore if we expect some property of
+it then we need to prove ourselves.
+
+When checking if two types can be the same Agda perform the /unification
+algorithm/. Trying to unify ~a ≡ b~ with ~c ≡ d~ means to show that ~a~ and ~c~
+can be simplified down to the same normal form.
+
+In our case unifying ~1 * a = a~ with ~a = 1 * a~ means trying to prove that
+~1 * a~ and ~a~ are syntactically the same (which are not) and worse is exactly
+what we are trying to prove.
+
+We can exploit the fact that equality is symmetrical with [[file:src/Chapter3-Proofs.agda::sym : {A : Set} → {x y : A} → x ≡ y → y ≡ x][a proof]].
+
+Then we can use that to [[file:src/Chapter3-Proofs.agda::-identityˡ′ : ∀ (x : ℕ) → x ≡ one * x][prove]] the flipped identity for multiplication.
+
+Is the combinator ~sym~ [[https://en.wikipedia.org/wiki/Involution_(mathematics)][involutive?]] lets prove it.

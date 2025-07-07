@@ -46,11 +46,10 @@ module Playground where
   cong : {A B : Set} → {x y : A} → (f : A → B) → x ≡ y → f x ≡ f y
   cong f refl = refl
 
-  -- Requires more work
+  -- With flipped arguments requires more work, and the use of `cong`
   zero-is-+-identity : ∀ (n : ℕ) → n + zero ≡ n
   zero-is-+-identity zero = refl
-  zero-is-+-identity (suc n) = {!!}
-  -- zero-is-+-identity (suc n) = cong suc (zero-is-+-identity n)
+  zero-is-+-identity (suc n) = cong suc (zero-is-+-identity n)
 
   suc-+ : ∀ (n m : ℕ) → n + suc m ≡ suc (n + m)
   suc-+ zero m = refl
@@ -82,7 +81,6 @@ module Playground where
 
   +-identityʳ : ∀ (x : ℕ) → x + zero ≡ x
   +-identityʳ = zero-is-+-identity
-
 
   -- Exercise
   *-identityˡ : ∀ (x : ℕ) → one * x ≡ x
@@ -129,3 +127,24 @@ module Playground where
   ∧-zeroʳ : (x : Bool) → x ∧ false ≡ false
   ∧-zeroʳ false = refl
   ∧-zeroʳ true = refl
+
+  -- Cannot do that
+  -- *-identityˡ′ : ∀ (x : ℕ) → x ≡ one * x
+  -- *-identityˡ′ = *-identityˡ
+
+  -- Equality is simmetrical
+  sym : {A : Set} → {x y : A} → x ≡ y → y ≡ x
+  sym refl = refl
+
+  -- Now we can do that
+  *-identityˡ′ : ∀ (x : ℕ) → x ≡ one * x
+  *-identityˡ′ x = sym (*-identityˡ x)
+
+  -- For fun, is sym involutive?
+  sym-involutive : {A : Set} → {x y : A} → (P : x ≡ y) → sym (sym P) ≡ P
+  sym-involutive refl = refl
+
+  -- Is not?
+  not-involutive : (x : Bool) → not (not x) ≡ x
+  not-involutive false = refl
+  not-involutive true = refl
