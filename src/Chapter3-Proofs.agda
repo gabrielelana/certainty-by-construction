@@ -39,6 +39,12 @@ module Playground where
   _ : three ≡ two + one
   _ = refl
 
+  _ : three ≡ one + two
+  _ = refl
+
+  _ : one + two ≡ three
+  _ = refl
+
   -- Easy, depends on how the `_+_` has been defined
   zero-is-+-identity₁ : ∀ (n : ℕ) → zero + n ≡ n
   zero-is-+-identity₁ _ = refl
@@ -49,7 +55,7 @@ module Playground where
   -- With flipped arguments requires more work, and the use of `cong`
   zero-is-+-identity : ∀ (n : ℕ) → n + zero ≡ n
   zero-is-+-identity zero = refl
-  zero-is-+-identity (suc n) = cong suc (zero-is-+-identity n)
+  zero-is-+-identity (suc m) = cong suc (zero-is-+-identity m)
 
   suc-+ : ∀ (n m : ℕ) → n + suc m ≡ suc (n + m)
   suc-+ zero m = refl

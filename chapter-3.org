@@ -25,7 +25,7 @@ Intuitionistic proofs correspond to algorithms.
 See [[https://www.youtube.com/watch?v=SknxggwRPzU]["Propostition as Types"]]
 
 #+BEGIN_QUOTE
-Anything you cn define precisely and manipulate symbolically can fall under the
+Anything you can define precisely and manipulate symbolically can fall under the
 purview of mathematics when done right.
 #+END_QUOTE
 
@@ -62,7 +62,7 @@ _ = true
 -- In particular we have two proofs of the existance of booleans: `true` and `false` 🤪
 #+END_SRC
 
-We say that a type is /inhabited/ if there exists at least one value of tha
+We say that a type is /inhabited/ if there exists at least one value of that
 type. Therefore every inhabitant of a type is a valid proof of that statement.
 
 #+BEGIN_QUOTE
