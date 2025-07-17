@@ -159,9 +159,13 @@ module Playground where
   trans refl refl = refl
 
   a^1≡a+b*0 : (a b : ℕ) → a ^ 1 ≡ a + b * 0
+  -- a ^ 1 ≡ a + b * 0
+  -- a ≡ a + b * 0
+  -- a + 0 ≡ a + b * 0
+  -- a + b * 0 ≡ a + b * 0
   a^1≡a+b*0 a b = trans (^-identityʳ a)
-                        (trans (sym (+-identityʳ a))
-                               (cong (λ φ → a + φ) (sym (*-zeroʳ b))))
+                    (trans (sym (+-identityʳ a))
+                      (cong (λ φ → a + φ) (sym (*-zeroʳ b))))
 
   a^1≡a+b*0¹ : (a b : ℕ) → a ^ 1 ≡ a + b * 0
   a^1≡a+b*0¹ a b = trans (^-identityʳ a)
@@ -171,7 +175,8 @@ module Playground where
 
   -- also using rewrite
   a^1≡a+b*0² : (a b : ℕ) → a ^ 1 ≡ a + b * 0
-  a^1≡a+b*0² a b rewrite ^-identityʳ a rewrite *-zeroʳ b rewrite +-identityʳ a = refl
+  a^1≡a+b*0² a b rewrite *-zeroʳ b rewrite +-identityʳ a rewrite *-identityʳ a = refl
+  -- a^1≡a+b*0² a b rewrite ^-identityʳ a rewrite *-zeroʳ b rewrite +-identityʳ a = refl
 
   module ≡-Reasoning where
 
@@ -210,7 +215,7 @@ module Playground where
     -- init of our proof
     infix 1 begin_
     begin_ : {A : Set} → {x y : A} → x ≡ y → x ≡ y
-    begin p = p
+    begin p = p                 --
 
     a^1≡a+b*0³ : (a b : ℕ) → a ^ 1 ≡ a + b * 0
     a^1≡a+b*0³ a b =
@@ -275,6 +280,16 @@ module Playground where
                     ≡⟨ sym (+-suc y x) ⟩
                       y + suc x
                     ∎
+
+  +-com₁ : (x y : ℕ) → x + y ≡ y + x
+  +-com₁ zero y = sym (+-identityʳ y)
+  +-com₁ (suc x) y = begin
+                       suc (x + y)
+                     ≡⟨ cong suc (+-com x y) ⟩
+                       suc (y + x)
+                     ≡⟨ sym (+-suc y x) ⟩
+                       y + suc x
+                     ∎
 
   *-suc : (x y : ℕ) → x * suc y ≡ x + x * y
   *-suc zero y = refl
