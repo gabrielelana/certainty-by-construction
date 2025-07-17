@@ -166,3 +166,63 @@ We can exploit the fact that equality is symmetrical with [[file:src/Chapter3-Pr
 Then we can use that to [[file:src/Chapter3-Proofs.agda::-identityˡ′ : ∀ (x : ℕ) → x ≡ one * x][prove]] the flipped identity for multiplication.
 
 Is the combinator ~sym~ [[https://en.wikipedia.org/wiki/Involution_(mathematics)][involutive?]] lets prove it.
+
+** Transitivity
+
+Proofs can be long and complex, as we have ways to combine programs, we have
+ways to compose proofs together.
+
+One way is to use the [[file:src/Chapter3-Proofs.agda::trans : {A : Set} {x y z : A} → x ≡ y → y ≡ z → x ≡ z][transitivity]] of equality.
+
+Using transitivity [[file:src/Chapter3-Proofs.agda::a^1≡a+b*0 : (a b : ℕ) → a ^ 1 ≡ a + b * 0][works]] but it's unreadable, but we have a solution for that.
+
+** Mixfix Parsing
+
+When defining operators Agda will let you put underscores (~_~) whenever there
+should go a parameter, in a sort of "template" language. This is called "Mixfix
+Parsing".
+
+With that you can define different kinds of operators
+
+#+BEGIN_SRC Agda
+_! : ℕ → ℕ
+_! = ?
+
+∣_ : ℕ → ℕ
+∣_ = ?
+
+□ : ℕ
+□ = ?
+
+five : ℕ
+five = ∣ ∣ ∣ ∣ ∣ □
+
+⌊_⌋ : ℝ → ℕ
+⌊_⌋ = ?
+
+if_then_else : {A : Set} \to Bool \to A \to A \to A
+if_then_else = ?
+
+case_of_ : {A B : Set} \to A \to (A \to B) \to B
+case_of_ = ?
+#+END_SRC
+
+** Equational Reasoning
+
+Can we have a DSL to have chain of equalities to look better than with ~trans~?
+
+#+BEGIN_EXAMPLE
+(𝑎 + 𝑏) × 𝑐 = 𝑎𝑐 + 𝑏𝑐
+            = 𝑎𝑐 + 𝑐𝑏
+            = 𝑐𝑏 + 𝑎𝑐
+
+(𝑎 + 𝑏) × 𝑐
+  = (distributivity)
+𝑎𝑐 + 𝑏𝑐
+  = (commutativity of x)
+𝑎𝑐 + 𝑐𝑏
+  = (commutativity of +)
+𝑐𝑏 + 𝑎𝑐
+#+END_EXAMPLE
+
+Turns out that we [[file:src/Chapter3-Proofs.agda::a^1≡a+b*0³ : (a b : ℕ) → a ^ 1 ≡ a + b * 0][can]].
