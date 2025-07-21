@@ -1,0 +1,121 @@
+* Relations
+
+** Preface
+We looked at how to represent equality and what can we prove with that, now we
+will generalize to /relations/.
+
+In doing that we will learn about:
+- universe polymorphism
+- pre-orders
+- partially ordered sets
+- graphs
+
+An alternative explanation of the same concepts can be found [[https://plfa.github.io/Relations/][here]].
+
+** Universe Levels
+Bertrand Russell's "barber paradox"
+
+#+BEGIN_QUOTE
+If there's a barber who shaves only barbers who do not shave themselves, does he
+shave himself?
+#+END_QUOTE
+
+If the barber shaves himself then it will not shave himself.
+If the barber doens't shaves himself then it will shave himself.
+Hence the paradox.
+
+Paradoxes are not good, once you get one then you can prove everything and the
+whole world falls apart and become meaningless.
+
+Solution: not all collections are sets, there's no "set of all sets", you need
+an higher order set to contain all the lower order sets.
+
+#+BEGIN_EXAMPLE
+-- This collection of sets is an infinite hierarchy called /sort/ or /universe/
+Set₀ < Set₁ < Set₂ < ...
+#+END_EXAMPLE
+
+Agda makes no distinctions between values and types, with indexed types we used
+values as indexes in types, but we can also use types as values.
+
+Using /universe polymorphism/ we can abstract over the universe level and talk
+about entity that can live in every level (values, types, types of types, ...).
+
+** Dependent Pairs
+
+Function arguments are universally quantified when encoding mathematical
+statements as types.
+
+#+BEGIN_SRC Agda
+-- The following statement
+≡-transitivity : {x y z : A} → x ≡ y → y ≡ z → x ≡ z
+≡-transitivity = ?
+
+-- is the same as
+≡-transitivity : ∀ {x y z : A} → x ≡ y → y ≡ z → x ≡ z
+≡-transitivity = ?
+#+END_SRC
+
+The existential quantifier do not explicitly exists in Agda since we are
+restricted to a /constructive world/ in which we must actually build the thing
+that we are claiming to exist.
+
+But there's a way to build a "there-exists" type in Agda, it's usually known as
+/sigma type/ with the following [[file:src/Chapter4-Relations.agda::record Σ (A : Set ℓ₁) (B : A → Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where -- according to the stdlib][definition]].
+
+The sigma type can be used to encode the property of a type (~A~).
+
+** Heterogeneous Binary Relations
+
+/Relations/ are a mathematical construct.
+
+#+BEGIN_QUOTE
+A binary relation ~_R_~ over sets ~X~ and ~Y~ is a subset of the cartesian product ~X × Y~.
+#+END_QUOTE
+
+We can encode relations in Agda as functions into ~Set~ such as ~{A B : Set} \to A
+× B \to Set~ or equivalently ~{A B : Set} \to A \to B \to Set~.
+
+[[file:src/Chapter4-Relations.agda::REL : Set a → Set b → (ℓ : Level) → Set (a ⊔ b ⊔ (lsuc ℓ))][Here]] a proper definition.
+
+Relations are required to satisfy no laws, meaning that everything can typcheck
+as relations, meaning that relations are /meaningless/ by themselves, they
+exists only as a method of organization.
+
+Some "boring" relations: [[file:src/Chapter4-Relations.agda::data Unrelated : REL A B lzero where][here]], [[file:src/Chapter4-Relations.agda::data Related : REL A B lzero where][here]] and [[file:src/Chapter4-Relations.agda::data FooBar : REL Foo Bar lzero where][here]].
+
+Unconstrained relations are not interesting, but /particular/ relations are.
+
+** Relationship Between Functions and Relations
+
+The most salient heterogeneous relationship is the "function" aka the relation
+between a function's domain and codomain.
+
+Let's [[file:src/Chapter4-Relations.agda::data _maps_↦_ (f : A → B) : REL A B lzero where][define]] such relation.
+
+A relation can be turned into a function only if the relation is
+- /Functional/ meaning that for every distict value on the left of the relation
+  there's exactly one value on the right ([[file:src/Chapter4-Relations.agda::Functional : REL A B ℓ → Set _][code]]).
+- /Totality/ meaning that every value on the left has a corresponding value on
+  the right ([[file:src/Chapter4-Relations.agda::Total : REL A B ℓ → Set _][code]]).
+
+Given a relation with both we [[file:src/Chapter4-Relations.agda::relToFn : (_~_ : REL A B ℓ) → Functional _~_ → Total _~_ → A → B][can]] turn it into function.
+
+** Homogeneous Relations
+
+/Homogeneous Relations/ are relations where the two elements have the same type.
+
+We will name such relations ~Rel~ and [[file:src/Chapter4-Relations.agda::Rel : Set a → (ℓ : Level) → Set (a ⊔ lsuc ℓ)][here]] is the definition.
+
+** Standard Properties of Relations
+
+When we come around relations we will look for properties, in particular if they
+are (let's call the relation ~~~:
+
+- /Reflexive/: For all ~n~, the relation ~n ~ n~ holds.
+- /Transitive/: For all ~m~, ~n~ and ~p~, if ~m ~ n~ and ~n ~ p~ hold, then ~m ~ p~ holds.
+- /Symmetric/: For all ~m~, ~n~, if ~m ~ n~ hold, then ~n ~ m~ holds.
+- /Anti-Symmetric/: For all ~m~, ~n~, if both ~m ~ n~ and ~n ~ m~ hold, then ~m ≡ m~.
+- /Total/: For all ~m~, ~n~, then either ~m ~ n~ or ~n ~ m~ holds.
+
+We can encode that in Agda:
