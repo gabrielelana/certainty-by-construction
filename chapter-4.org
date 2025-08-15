@@ -28,7 +28,7 @@ Paradoxes are not good, once you get one then you can prove everything and the
 whole world falls apart and become meaningless.
 
 Solution: not all collections are sets, there's no "set of all sets", you need
-an higher order set to contain all the lower order sets.
+an higher order set to contain all of the lower order sets.
 
 #+BEGIN_EXAMPLE
 -- This collection of sets is an infinite hierarchy called /sort/ or /universe/
@@ -109,8 +109,9 @@ We will name such relations ~Rel~ and [[file:src/Chapter4-Relations.agda::Rel : 
 
 ** Standard Properties of Relations
 
-When we come around relations we will look for properties, in particular if they
-are (let's call the relation ~~~:
+We will use ~~~ as a constructor to build relations between values.
+
+When we come around relations we will look for properties, such as:
 
 - /Reflexive/: For all ~n~, the relation ~n ~ n~ holds.
 - /Transitive/: For all ~m~, ~n~ and ~p~, if ~m ~ n~ and ~n ~ p~ hold, then ~m ~ p~ holds.
@@ -118,4 +119,158 @@ are (let's call the relation ~~~:
 - /Anti-Symmetric/: For all ~m~, ~n~, if both ~m ~ n~ and ~n ~ m~ hold, then ~m ≡ m~.
 - /Total/: For all ~m~, ~n~, then either ~m ~ n~ or ~n ~ m~ holds.
 
-We can encode that in Agda:
+We can encode them in Agda:
+- [[file:src/Chapter4-Relations.agda::Reflexive : Rel A ℓ → Set _][Reflexive]]
+- [[file:src/Chapter4-Relations.agda::Symmetric : Rel A ℓ → Set _][Symmetric]]
+- [[file:src/Chapter4-Relations.agda::Anti-Symmetric : Rel A ℓ → Set _][Anti-Symmetric]]
+- [[file:src/Chapter4-Relations.agda::Transitive : Rel A ℓ → Set _][Transitive]]
+- [[file:src/Chapter4-Relations.agda::Total : REL A B ℓ → Set _][Totality]]
+
+** Attempting to Order the Naturals
+
+In Agda when you want to represent some property you build a type, ok, but what
+type? You learn by doing and failing, let's try to encode the relation of "less
+than or equal" between two number in a type in Agda.
+
+[[file:src/Chapter4-Relations.agda::data _≤_ : Rel ℕ lzero where][This]] is one of the "not so convinient" ways to represent it.
+
+** Substitution
+
+It's a way for rewriting propositional equalities at type level. Powerful, but
+most of the time the need to reach out for it is the hint that there's a bad
+definition somehwere.
+
+[[file:src/Chapter4-Relations.agda::subst : {x y : A} → (P : A → Set ℓ) → x ≡ y → P x → P y][Here]] is a surprisingly short and straightforward definition.
+
+We can use ~subst~ to prove reflexivity through the already proven ~+-identityʳ~
+
+** Unification
+
+Why Agda when asked to make case for ~x≤x~ it replies with an error? We have
+only one constructor for ~_≤_~, why it's so difficult?
+
+#+BEGIN_SRC Agda
+≤-refl : Reflexive _≤_
+≤-refl {zero} = lte zero zero
+≤-refl {suc x} with ≤-refl {x}
+... | x≤x = ?
+#+END_SRC
+
+Agda will try to /unify/ the indices on type's constructors with the indices of
+your expression.
+
+Unification is purely sintactical.
+
+In this case we need to unify ~x≤x~ of type ~x ≤ x~ with ~lte~ of type ~a ≤ a + b~
+
+For this Agda will come up with the a series of equation without a solution and
+therefore will give you the error.
+
+#+BEGIN_EXAMPLE
+I'm not sure if there should be a case for the constructor lte,
+because I get stuck when trying to solve the following unification
+problems (inferred index ≟ expected index):
+  a ≟ x₁
+  b + a ≟ x₁
+#+END_EXAMPLE
+
+Ok, for ~a ≟ x₁~ then ~a~ will be ~x₁~ but ~b~? We have no syntactical way to
+unify ~b~, therefore Agda will give up.
+
+** Overconstrained by Dot Patterns
+
+Why in the definition of ~suc-mono~ we were able to make case on ~x≤y~? We can
+ask Agda by making explicit the implicit variables
+
+#+BEGIN_SRC Agda
+suc-mono : {x y : ℕ} → x ≤ y → suc x ≤ suc y
+suc-mono {x} {y} x≤y = ?
+#+END_SRC
+
+By making case on ~x≤y~ we get
+
+#+BEGIN_SRC Agda
+suc-mono : {x y : ℕ} → x ≤ y → suc x ≤ suc y
+suc-mono {x} {.(x + b)} (lte .x b) = lte (suc x) b
+#+END_SRC
+
+Now we have both ~x~ and ~y~ therefore we can unify
+
+#+BEGIN_EXAMPLE
+a ≟ x
+y ≟ x + b
+#+END_EXAMPLE
+
+#+BEGIN_QUOTE
+The takeaway here is that type indices should always be bindings or
+constructors, but never function calls, doing so risks running out of places to
+put the indices and will prevent Agda from being able to pattern match on your
+type.
+#+END_QUOTE
+
+** Ordering the Natural Numbers
+
+[[file:src/Chapter4-Relations.agda::module Definition-LessThanOrEqualTo where][Here]] is the working defintion of ~≤~ (DISCUSS: how does it work?)
+
+We now this is the right way because proving ~suc-mono~, ~≤-refl~ and ~≤-trans~ is easy.
+
+** Preorders
+
+Binary relations that are reflexive and trasivitive are called /preorders/.
+
+** Preorder Reasoning
+
+The equational reasoning that we created used only reflexivity and transitivity,
+therefore it can be used on every preorder!
+
+** Reasoning Over _≤_
+
+Our proof are more readable.
+
+** Graph Reachability
+
+There are other facinating preorders.
+
+Consider a graph ~G = (V, E)~ where ~V~ are vertices and ~E~ are edges between
+those vertices.
+
+We can consider ~E~ a relation on ~V~, in Agda we can define vertices as some
+~Set ℓ₁~ and edges as a relationship ~_⇒_ : Rel V ℓ₂~ between vertices.
+
+We cannot say anything on the relationship ~E~ because it's a parameter, but we
+can define another relationship on top of that, the reachability: given a
+starting vertex we can reach another vertex if there's a path of edges between
+those vertices.
+
+We call this relation [[file:~/code/Moneyfarm/ledger/src/main/scala/com/moneyfarm/ledger/Spike.scala::type Context <: LedgerContext][~Path~]].
+
+NOTE: in ~Path~ we have a constructor of the path, the reflexive contructor
+(~here~) and the transitive constructor (~connect~). We have built a type we
+constructors that represents a preorder. Path is the /free preorder/.
+
+** Free Preorders in the Wild
+
+[[file:src/Chapter4-Relations.agda::module Example-AboutABoy where][Example]]
+
+** Antisymmetry
+
+Antisymmetry: if we know that ~x ~ y~ and ~y ~ x~ then it must be the case that
+~x = y~.
+
+It's easy to prove that ~_≤_~ is antisimmetric.
+
+** Equivalence Relations and Posets
+
+- [[file:src/Chapter4-Relations.agda::record IsEquivalence : Set (a ⊔ ℓ) where][Equivalence Relations]] (~_≡_~):
+  - Reflexive
+  - Transtive
+  - Symmetric
+
+- [[file:src/Chapter4-Relations.agda::record IsPartialOrder : Set (a ⊔ ℓ) where][Partial Order]] (~_≤_~):
+  - Reflexive
+  - Transitive
+  - Antisymmetric
+
+** Strictly Less Than
+
+Easy to [[file:src/Chapter4-Relations.agda::_<_ : Rel ℕ lzero][define]] in terms of ~_≤~ but for now not very useful.
